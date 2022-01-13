@@ -68,4 +68,4 @@ def main(dst):
 
 
 if __name__ == "__main__":
-    main("google.com")
+    main(input("Enter addr: "))
