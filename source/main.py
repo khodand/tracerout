@@ -1,3 +1,4 @@
+import select
 import socket
 
 
@@ -23,7 +24,9 @@ class Traceroute:
 
             addr = None
             try:
-                data, addr = receiver.recvfrom(1024)
+                ready = select.select([receiver], [], [], 10)
+                if ready[0]:
+                    data, addr = receiver.recvfrom(1024)
             except socket.error as e:
                 raise IOError(f'Socket error: {e}')
             finally:
@@ -32,16 +35,19 @@ class Traceroute:
 
             if addr:
                 print(f'{self.ttl} {addr[0]}')
+                if addr[0] == dst_ip:
+                    break
             else:
                 print(f'{self.ttl} *')
 
             self.ttl += 1
-            if addr[0] == dst_ip or self.ttl > self.hops:
+            if self.ttl > self.hops:
                 break
 
     def create_receiver(self):
         s = socket.socket(family=socket.AF_INET, type=socket.SOCK_RAW, proto=socket.getprotobyname('icmp'))
-        s.settimeout(30)
+        s.setblocking(False)
+
         try:
             s.bind(('', self.port))
         except socket.error as e:
