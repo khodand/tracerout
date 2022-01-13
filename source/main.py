@@ -14,6 +14,8 @@ class Traceroute:
         except socket.error as e:
             raise IOError(f'Unable to resolve {self.dst}: {e}')
 
+        print("start")
+
         while True:
             receiver = self.create_receiver()
             sender = self.create_sender()
